@@ -8,9 +8,14 @@ import Data.List
 -- the list of remaining possible answers in the guess
 type GameState = [[Card]]
 
+suits = [Club, Diamond, Heart, Spade]
+ranks = [R2, R3, R4, R5, R6, R7, R8, R9, R10, Jack, Queen, King, Ace ]
+
+initDeck :: [Card]
+initDeck = [ Card x y | x<-suits, y<-ranks]
 -- first args : the number of cards in the answer
--- todo : initGameState :: Int -> GameState
--- initGameState n =
+initGameState :: Int -> GameState
+initGameState n = combinations n initDeck
 
 -- The answerer begins by selecting some number of cards from his or her deck without showing the guesser.
 
@@ -34,14 +39,24 @@ type GameState = [[Card]]
 
 feedback :: [Card] -> [Card] -> (Int,Int,Int,Int,Int)
 feedback [] [] = (0 ,0 ,0 ,0 ,0)
-feedback ts gs = ((match (sort ts) (sort gs)),
+feedback ts gs = ((match ts gs),
                   (lhR (<) (getR ts) (holestR (<) (getR gs))),
-                  (match (sort (getR ts)) (sort (getR gs))),
+                  (match (getR ts) (getR gs)),
                   (lhR (>) (getR ts) (holestR (>) (getR gs))),
-                  (match (sort (getS ts)) (sort (getS gs))))
+                  (match (getS ts) (getS gs)))
 
--- initialGuess :: Int -> ([Card],GameState)
--- initialGuess n =
+initialGuess :: Int -> ([Card],GameState)
+initialGuess n = (initialCards n, initGameState n)
+
+-- initalGuessCards
+initialCards :: Int -> [Card]
+initialCards n  = [Card s r | (s, r) <- (zip (take n suits) (everyNth (13 `div` (n + 1)) ranks)) ]
+
+-- get every nth element frorm list
+everyNth :: Int -> [t] -> [t]
+everyNth _ [] = []
+everyNth n xs = [xs !! i | i <- [n,n+n+1.. (length xs)-1]]
+
 -- nextGuess :: ([Card],GameState) -> (Int,Int,Int,Int,Int) -> ([Card],GameState)
 
 -- get the number of value in the answer lower/highest than the lowest/highest value in the guess
@@ -73,20 +88,25 @@ getS :: [Card]->[Suit]
 getS [] = []
 getS ((Card s r):xs) = s:(getS xs)
 
--- remove duplicates from list
-rmdups :: (Ord a) => [a] -> [a]
-rmdups = map head . group . sort
+match :: (Ord a) => [a] -> [a] -> Int
+match xs ys = matchS (sort xs) (sort ys)
 
 -- find match values, no duplicate. NOTED : list have to be sorted !!!
 -- first argument : targetValues.
 -- second argument : guessValues.
-match :: (Ord a) => [a] -> [a] -> Int
-match [] _ = 0
-match _ [] = 0
-match (x:xs) (y:ys)
-    | x == y = 1 + match (xs) (ys)
-    | x > y = match (x:xs) (ys)
-    | x < y = match (xs) (y:ys)
+matchS :: (Ord a) => [a] -> [a] -> Int
+matchS [] _ = 0
+matchS _ [] = 0
+matchS (x:xs) (y:ys)
+    | x == y = 1 + matchS (xs) (ys)
+    | x > y = matchS (x:xs) (ys)
+    | x < y = matchS (xs) (y:ys)
 
+-- a function to make n combinations in a list
+-- first args : n
+-- second args : the list
+combinations :: Int -> [a] -> [[a]]
+combinations 0 _  = [ [] ]
+combinations n xs = [ y:ys | y:xs' <- tails xs, ys <- combinations (n-1) xs']
 
 
