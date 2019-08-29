@@ -18,7 +18,7 @@ initDeck :: [Card]
 initDeck = [minBound..maxBound]::[Card]
 -- first args : the number of cards in the answer
 initGameState :: Int -> GameState
-initGameState n = combinations n initDeck
+initGameState n = map sort (combinations n initDeck)
 
 -- The answerer begins by selecting some number of cards from his or her deck without showing the guesser.
 
@@ -70,9 +70,10 @@ everyNth n xs = [xs !! i | i <- [n,n+n+1.. (length xs)-1]]
 nextGuess :: ([Card],GameState) -> (Int,Int,Int,Int,Int) -> ([Card],GameState)
 nextGuess (guess, gameS) (a, b, c, d, e)
     | a == (length guess) = (guess, [[]]) -- you win, no other possible guess
-    | otherwise = (guess, eliByRange ((b, lowestRank), (d, highestRank)) gameS)
+    | otherwise = (guess, eliRangeGs)
     where lowestRank = (holestR (<) (getR guess))
           highestRank = (holestR (>) (getR guess))
+          eliRangeGs = eliByRange ((b, lowestRank), (d, highestRank)) (delete (sort guess) gameS)
 
 -- eliminate the impossible combinations from gamestate, by the 2nd and 4th feedback
 -- 1st args : tuple (2nd feedback, lowestRank), (4th feedback, highestRank)
@@ -86,7 +87,6 @@ eliByRange tps gss = filter (matchRange tps) gss
 -- 2nd args : the card combination in game state
 matchRange :: ((Int, Rank), (Int, Rank)) -> [Card]  -> Bool
 matchRange ((a, x),(b, y)) cs  = ((lhR (<) (getR cs) x) == a) && ((lhR (>) (getR cs) y) == b)
-
 
 -- get the number of value in the answer lower/highest than the lowest/highest value in the guess
 -- first args : operator used (> for highest, < for lowest)
@@ -134,7 +134,7 @@ matchS (x:xs) (y:ys)
 -- a function to make n combinations in a list
 -- first args : n
 -- second args : the list
-combinations :: Int -> [a] -> [[a]]
+combinations ::(Ord a)=> Int -> [a] -> [[a]]
 combinations 0 _  = [ [] ]
 combinations n xs = [ y:ys | y:xs' <- tails xs, ys <- combinations (n-1) xs']
 
