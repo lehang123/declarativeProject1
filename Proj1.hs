@@ -11,8 +11,11 @@ type GameState = [[Card]]
 suits = [Club, Diamond, Heart, Spade]
 ranks = [R2, R3, R4, R5, R6, R7, R8, R9, R10, Jack, Queen, King, Ace ]
 
+-- initDeck :: [Card]
+-- initDeck = [ Card x y | x<-suits, y<-ranks]
+
 initDeck :: [Card]
-initDeck = [ Card x y | x<-suits, y<-ranks]
+initDeck = [minBound..maxBound]::[Card]
 -- first args : the number of cards in the answer
 initGameState :: Int -> GameState
 initGameState n = combinations n initDeck
@@ -33,10 +36,13 @@ initGameState n = combinations n initDeck
 -- How many cards in the answer have rank higher than the highest rank in the guess(higher ranks).
 
 -- How many of the cards in the answer have the same suit as a card in the guess,
---  only counting a card in the guess once (correct suits).
+    --  only counting a card in the guess once (correct suits).
     -- For example, if the answer has two clubs and the guess has one club,
     --  or vice versa, the correct suits number would be 1, not 2.
 
+-- giving feedbacks
+-- 1st args : target (answer)
+-- 2nd args : guess
 feedback :: [Card] -> [Card] -> (Int,Int,Int,Int,Int)
 feedback [] [] = (0 ,0 ,0 ,0 ,0)
 feedback ts gs = ((match ts gs),
@@ -57,7 +63,30 @@ everyNth :: Int -> [t] -> [t]
 everyNth _ [] = []
 everyNth n xs = [xs !! i | i <- [n,n+n+1.. (length xs)-1]]
 
--- nextGuess :: ([Card],GameState) -> (Int,Int,Int,Int,Int) -> ([Card],GameState)
+-- performing guesses until it got it right
+-- 1 args : previous guess and gameState
+-- 2 args : feedback from previous guess
+-- return new guess, and new game state
+nextGuess :: ([Card],GameState) -> (Int,Int,Int,Int,Int) -> ([Card],GameState)
+nextGuess (guess, gameS) (a, b, c, d, e)
+    | a == (length guess) = (guess, [[]]) -- you win, no other possible guess
+    | otherwise = (guess, eliByRange ((b, lowestRank), (d, highestRank)) gameS)
+    where lowestRank = (holestR (<) (getR guess))
+          highestRank = (holestR (>) (getR guess))
+
+-- eliminate the impossible combinations from gamestate, by the 2nd and 4th feedback
+-- 1st args : tuple (2nd feedback, lowestRank), (4th feedback, highestRank)
+-- 2nd current game state
+-- return new game state after elimination
+eliByRange :: ((Int, Rank), (Int, Rank)) -> GameState -> GameState
+eliByRange tps gss = filter (matchRange tps) gss
+
+-- determine if the card combination match the range requirement, to filter out
+-- 1st args : tuple (2nd feedback, lowestRank), (4th feedback, highestRank), total number of cards (2~4)
+-- 2nd args : the card combination in game state
+matchRange :: ((Int, Rank), (Int, Rank)) -> [Card]  -> Bool
+matchRange ((a, x),(b, y)) cs  = ((lhR (<) (getR cs) x) == a) && ((lhR (>) (getR cs) y) == b)
+
 
 -- get the number of value in the answer lower/highest than the lowest/highest value in the guess
 -- first args : operator used (> for highest, < for lowest)
