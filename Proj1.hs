@@ -1,4 +1,4 @@
--- module Proj1 (feedback, initialGuess, nextGuess, GameState) where
+module Proj1 (feedback, initialGuess, nextGuess, GameState) where
 
 import Card
 import Data.List
@@ -67,15 +67,53 @@ everyNth n xs = [xs !! i | i <- [n,n+n+1.. (length xs)-1]]
 -- 1 args : previous guess and gameState
 -- 2 args : feedback from previous guess
 -- return new guess, and new game state
+
+-- nextGuess :: ([Card],GameState) -> (Int,Int,Int,Int,Int) -> ([Card],GameState)
+-- nextGuess (guess, gameS) (a, b, c, d, e)
+--     | a == (length guess) = (guess, [[]]) -- you win, no other possible guess
+--     | otherwise = (guess, leftGs)
+--     where lowestRank = (holestR (<) (getR guess))
+--           highestRank = (holestR (>) (getR guess))
+--           eliRangeGs = eliByRange ((b, lowestRank), (d, highestRank)) (delete (sort guess) gameS)
+--           eliRankSuitGs = eliByRS ((c, getR guess), (e, getS guess)) eliRangeGs
+--           leftGs = eliRankSuitGs
 nextGuess :: ([Card],GameState) -> (Int,Int,Int,Int,Int) -> ([Card],GameState)
 nextGuess (guess, gameS) (a, b, c, d, e)
     | a == (length guess) = (guess, [[]]) -- you win, no other possible guess
-    | otherwise = (guess, eliRankSuitGs)
+    | otherwise = (pickNextGuess leftOverGS, leftOverGS)
+    where leftOverGS = shrinkGameState (guess, gameS) (a, b, c, d, e)
+
+-- according to current game state, pick the next best guess
+pickNextGuess :: GameState -> [Card]
+pickNextGuess gs = pickFirstGuess stps
+    where stps = sortBy (\(a,_) (b,_) -> compare a b) [(cs, (estGuess cs gs))| cs<- gs]
+
+pickFirstGuess :: [([Card], Int)] -> [Card]
+pickFirstGuess [] = []
+pickFirstGuess ((cs, n):tps) = cs
+
+getNum :: [([Card], Int)] -> Int
+getNum ((_, n):tps) = n
+
+-- estimate a guess computation
+-- 1st args : your guess
+-- 2rd args : the remaining game state
+estGuess :: [Card] -> GameState -> Int
+estGuess cs gs = div (sum [ (length (shrinkGameState (cs, gs) (feedback cs acs)))^2 | acs<-gs ]) (length gs)
+
+
+
+-- perform elimination of impossible game state
+-- 1 args : previous guess and gameState
+-- 2 args : feedback from previous guess
+-- return possible game state
+shrinkGameState :: ([Card],GameState) -> (Int,Int,Int,Int,Int) -> GameState
+shrinkGameState (guess, gameS) (a, b, c, d, e) = leftGameState
     where lowestRank = (holestR (<) (getR guess))
           highestRank = (holestR (>) (getR guess))
           eliRangeGs = eliByRange ((b, lowestRank), (d, highestRank)) (delete (sort guess) gameS)
           eliRankSuitGs = eliByRS ((c, getR guess), (e, getS guess)) eliRangeGs
-
+          leftGameState = eliRankSuitGs
 
 -- eliminate the impossible combinations from gamestate, by the 3rd and 5th feedback
 -- 1st args : tuple (3rd feedback,  current guess rank)
@@ -171,10 +209,11 @@ combinations n xs = [ y:ys | y:xs' <- tails xs, ys <- combinations (n-1) xs']
 -- second args : the n combinations
 -- third args : check list
 ccombs :: (Ord a)=> [a]-> Int ->[a]->Bool
-ccombs [] _ [] = True
-ccombs _ _ [] = False
-ccombs [] _ _ = False
-ccombs xs n ys =  or [ isInfixOf (sort x) (sort ys) | x <-(combinations n xs)]
+-- ccombs [] _ [] = True
+-- ccombs _ _ [] = False
+-- ccombs [] _ _ = False
+-- ccombs xs n ys =  or [ (match x ys) == (length x) | x <-(combinations n xs)]
+ccombs xs n ys = (match xs ys) == n
 
 
 -- check if list contains same element
