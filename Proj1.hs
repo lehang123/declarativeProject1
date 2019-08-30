@@ -70,10 +70,38 @@ everyNth n xs = [xs !! i | i <- [n,n+n+1.. (length xs)-1]]
 nextGuess :: ([Card],GameState) -> (Int,Int,Int,Int,Int) -> ([Card],GameState)
 nextGuess (guess, gameS) (a, b, c, d, e)
     | a == (length guess) = (guess, [[]]) -- you win, no other possible guess
-    | otherwise = (guess, eliRangeGs)
+    | otherwise = (guess, eliRankSuitGs)
     where lowestRank = (holestR (<) (getR guess))
           highestRank = (holestR (>) (getR guess))
           eliRangeGs = eliByRange ((b, lowestRank), (d, highestRank)) (delete (sort guess) gameS)
+          eliRankSuitGs = eliByRS ((c, getR guess), (e, getS guess)) eliRangeGs
+
+
+-- eliminate the impossible combinations from gamestate, by the 3rd and 5th feedback
+-- 1st args : tuple (3rd feedback,  current guess rank)
+-- 2nd current game state
+-- return new game state after elimination
+eliByRS :: ((Int, [Rank]), (Int, [Suit]))-> GameState -> GameState
+eliByRS (rtps, stps) gss =  filter (matchRS (rtps, stps)) gss -- current version
+-- eliByRS (rtps, stps) gss = filter (matchSuit stps) (filter (matchRank rtps) gss) -- separate version
+
+-- determine if the card combination match the rank requirement, to filter out
+-- 1st args : tuple (3rd feedback,  current guess rank)
+-- 2nd args : the card combination in game state (each)
+matchRank :: (Int, [Rank]) -> [Card] -> Bool
+matchRank (0, rs) cs = not (lcse rs (getR cs)) -- since there is 0 match in rank, any combination that contain the ranks in current guess is impossible
+matchRank (n, rs) cs = ccombs rs n (getR cs)
+
+-- determine if the card combination match the suit requirement, to filter out
+-- 1st args : tuple (3rd feedback,  current guess suit)
+-- 2nd args : the card combination in game state (each)
+matchSuit :: (Int, [Suit]) -> [Card] -> Bool
+matchSuit (0, ss) cs = not (lcse ss (getS cs)) -- since there is 0 match in rank, any combination that contain the ranks in current guess is impossible
+matchSuit (n, ss) cs = ccombs ss n (getS cs)
+
+-- combine matchRank and suit in a function
+matchRS :: ((Int, [Rank]), (Int, [Suit])) -> [Card] -> Bool
+matchRS (rtps, stps) cs = (matchRank rtps cs) && (matchSuit stps cs)
 
 -- eliminate the impossible combinations from gamestate, by the 2nd and 4th feedback
 -- 1st args : tuple (2nd feedback, lowestRank), (4th feedback, highestRank)
@@ -84,7 +112,7 @@ eliByRange tps gss = filter (matchRange tps) gss
 
 -- determine if the card combination match the range requirement, to filter out
 -- 1st args : tuple (2nd feedback, lowestRank), (4th feedback, highestRank), total number of cards (2~4)
--- 2nd args : the card combination in game state
+-- 2nd args : the card combination in game state (each)
 matchRange :: ((Int, Rank), (Int, Rank)) -> [Card]  -> Bool
 matchRange ((a, x),(b, y)) cs  = ((lhR (<) (getR cs) x) == a) && ((lhR (>) (getR cs) y) == b)
 
@@ -134,8 +162,31 @@ matchS (x:xs) (y:ys)
 -- a function to make n combinations in a list
 -- first args : n
 -- second args : the list
-combinations ::(Ord a)=> Int -> [a] -> [[a]]
+combinations :: (Ord a)=> Int -> [a] -> [[a]]
 combinations 0 _  = [ [] ]
 combinations n xs = [ y:ys | y:xs' <- tails xs, ys <- combinations (n-1) xs']
 
+-- check if a list contain one of those combination in the other list
+-- first args : the list of combinations
+-- second args : the n combinations
+-- third args : check list
+ccombs :: (Ord a)=> [a]-> Int ->[a]->Bool
+ccombs [] _ [] = True
+ccombs _ _ [] = False
+ccombs [] _ _ = False
+ccombs xs n ys =  or [ isInfixOf (sort x) (sort ys) | x <-(combinations n xs)]
 
+
+-- check if list contains same element
+lcse :: (Ord a) => [a] -> [a] -> Bool
+lcse xs ys = slcse (sort xs) (sort ys)
+
+-- check if list contains at least one same element (sorted list only)
+slcse :: (Ord a)=> [a] -> [a] -> Bool
+slcse [] [] = True
+slcse _ [] = False
+slcse [] _ = False
+slcse (x:xs) (y:ys)
+    | x == y = True
+    | x > y = slcse (x:xs) (ys)
+    | x < y = slcse (xs) (y:ys)
