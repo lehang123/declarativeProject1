@@ -2,6 +2,7 @@ module Proj1 (feedback, initialGuess, nextGuess, GameState) where
 
 import Card
 import Data.List
+import Utils
 -- import HaskellTest
 -- import Proj1Test
 
@@ -19,26 +20,6 @@ initDeck = [minBound..maxBound]::[Card]
 -- first args : the number of cards in the answer
 initGameState :: Int -> GameState
 initGameState n = map sort (combinations n initDeck)
-
--- The answerer begins by selecting some number of cards from his or her deck without showing the guesser.
-
--- 5 feedbacks
--- how many cards in the guess are correct (done)
-
--- how many cards in the answer have rank lower than the lowest rank in the guess.(done)
-    -- Ranks, in order from low to high, are 2–10, Jack, Queen, King, and Ace.
-
--- How many of the cards in the answer have the same rank as a card in the guess (correct ranks).
-    --  For this, each card in the guess is only counted once.
-    --  That is, if the answer has two queens and the guess has one,
-    --  the correct ranks number would be 1, not 2. Likewise if there is one queen in the answer and two in the guess.
-
--- How many cards in the answer have rank higher than the highest rank in the guess(higher ranks).
-
--- How many of the cards in the answer have the same suit as a card in the guess,
-    --  only counting a card in the guess once (correct suits).
-    -- For example, if the answer has two clubs and the guess has one club,
-    --  or vice versa, the correct suits number would be 1, not 2.
 
 -- giving feedbacks
 -- 1st args : target (answer)
@@ -67,16 +48,6 @@ everyNth n xs = [xs !! i | i <- [n,n+n+1.. (length xs)-1]]
 -- 1 args : previous guess and gameState
 -- 2 args : feedback from previous guess
 -- return new guess, and new game state
-
--- nextGuess :: ([Card],GameState) -> (Int,Int,Int,Int,Int) -> ([Card],GameState)
--- nextGuess (guess, gameS) (a, b, c, d, e)
---     | a == (length guess) = (guess, [[]]) -- you win, no other possible guess
---     | otherwise = (guess, leftGs)
---     where lowestRank = (holestR (<) (getR guess))
---           highestRank = (holestR (>) (getR guess))
---           eliRangeGs = eliByRange ((b, lowestRank), (d, highestRank)) (delete (sort guess) gameS)
---           eliRankSuitGs = eliByRS ((c, getR guess), (e, getS guess)) eliRangeGs
---           leftGs = eliRankSuitGs
 nextGuess :: ([Card],GameState) -> (Int,Int,Int,Int,Int) -> ([Card],GameState)
 nextGuess (guess, gameS) (a, b, c, d, e)
     | a == (length guess) = (guess, [[]]) -- you win, no other possible guess
@@ -92,16 +63,11 @@ pickFirstGuess :: [([Card], Int)] -> [Card]
 pickFirstGuess [] = []
 pickFirstGuess ((cs, n):tps) = cs
 
-getNum :: [([Card], Int)] -> Int
-getNum ((_, n):tps) = n
-
 -- estimate a guess computation
 -- 1st args : your guess
 -- 2rd args : the remaining game state
 estGuess :: [Card] -> GameState -> Int
 estGuess cs gs = div (sum [ (length (shrinkGameState (cs, gs) (feedback cs acs)))^2 | acs<-gs ]) (length gs)
-
-
 
 -- perform elimination of impossible game state
 -- 1 args : previous guess and gameState
@@ -154,25 +120,6 @@ eliByRange tps gss = filter (matchRange tps) gss
 matchRange :: ((Int, Rank), (Int, Rank)) -> [Card]  -> Bool
 matchRange ((a, x),(b, y)) cs  = ((lhR (<) (getR cs) x) == a) && ((lhR (>) (getR cs) y) == b)
 
--- get the number of value in the answer lower/highest than the lowest/highest value in the guess
--- first args : operator used (> for highest, < for lowest)
--- second args : the answer cards
--- third args : the lowest rank
-lhR ::(Ord a)=> (a -> a -> Bool) -> [a] -> a -> Int
-lhR _ [] _ = 0
-lhR (op) (x:xs) (gr)
-    | x `op` gr = 1 + (lhR (op) (xs) (gr))
-    | otherwise = lhR (op) xs (gr)
-
--- get the lowest/highest value in the cards
--- first argument : operator used (> for highest, < for lowest)
--- cards to input
-holestR ::(Ord a)=> (a -> a -> Bool)->[a]->a
-holestR _ [r] = r
-holestR op (x:xs)
-    | x `op` (holestR (op) xs) = x
-    | otherwise = holestR (op) xs
-
 -- getRanks from cards
 getR :: [Card]->[Rank]
 getR [] = []
@@ -182,50 +129,3 @@ getR ((Card s r):xs) = r:(getR xs)
 getS :: [Card]->[Suit]
 getS [] = []
 getS ((Card s r):xs) = s:(getS xs)
-
-match :: (Ord a) => [a] -> [a] -> Int
-match xs ys = matchS (sort xs) (sort ys)
-
--- find match values, no duplicate. NOTED : list have to be sorted !!!
--- first argument : targetValues.
--- second argument : guessValues.
-matchS :: (Ord a) => [a] -> [a] -> Int
-matchS [] _ = 0
-matchS _ [] = 0
-matchS (x:xs) (y:ys)
-    | x == y = 1 + matchS (xs) (ys)
-    | x > y = matchS (x:xs) (ys)
-    | x < y = matchS (xs) (y:ys)
-
--- a function to make n combinations in a list
--- first args : n
--- second args : the list
-combinations :: (Ord a)=> Int -> [a] -> [[a]]
-combinations 0 _  = [ [] ]
-combinations n xs = [ y:ys | y:xs' <- tails xs, ys <- combinations (n-1) xs']
-
--- check if a list contain one of those combination in the other list
--- first args : the list of combinations
--- second args : the n combinations
--- third args : check list
-ccombs :: (Ord a)=> [a]-> Int ->[a]->Bool
--- ccombs [] _ [] = True
--- ccombs _ _ [] = False
--- ccombs [] _ _ = False
--- ccombs xs n ys =  or [ (match x ys) == (length x) | x <-(combinations n xs)]
-ccombs xs n ys = (match xs ys) == n
-
-
--- check if list contains same element
-lcse :: (Ord a) => [a] -> [a] -> Bool
-lcse xs ys = slcse (sort xs) (sort ys)
-
--- check if list contains at least one same element (sorted list only)
-slcse :: (Ord a)=> [a] -> [a] -> Bool
-slcse [] [] = True
-slcse _ [] = False
-slcse [] _ = False
-slcse (x:xs) (y:ys)
-    | x == y = True
-    | x > y = slcse (x:xs) (ys)
-    | x < y = slcse (xs) (y:ys)
