@@ -54,10 +54,14 @@ nextGuess (guess, gameS) (a, b, c, d, e)
     | otherwise = (pickNextGuess leftOverGS, leftOverGS)
     where leftOverGS = shrinkGameState (guess, gameS) (a, b, c, d, e)
 
+-- testing pick random guess
+-- pickRandomGuess :: GameState -> [Card]
+-- pickRandomGuess (cs:gs) = cs
+
 -- according to current game state, pick the next best guess
 pickNextGuess :: GameState -> [Card]
 pickNextGuess gs = pickFirstGuess stps
-    where stps = sortBy (\(a,_) (b,_) -> compare a b) [(cs, (estGuess cs gs))| cs<- gs]
+    where stps = sortBy (\(_ , a) (_ , b) -> compare b a) [(cs, (estGuess cs gs))| cs<- gs]
 
 pickFirstGuess :: [([Card], Int)] -> [Card]
 pickFirstGuess [] = []
@@ -67,7 +71,12 @@ pickFirstGuess ((cs, n):tps) = cs
 -- 1st args : your guess
 -- 2rd args : the remaining game state
 estGuess :: [Card] -> GameState -> Int
-estGuess cs gs = div (sum [ (length (shrinkGameState (cs, gs) (feedback cs acs)))^2 | acs<-gs ]) (length gs)
+estGuess cs gs = (sum [ t (feedback cs acs)  | acs<-gs ])
+
+t :: (Int, Int, Int, Int, Int)-> Int
+t (a, b, c, d, e) = a
+
+-- (length (shrinkGameState (cs, gs) (feedback cs acs)))^2
 
 -- perform elimination of impossible game state
 -- 1 args : previous guess and gameState
@@ -78,15 +87,15 @@ shrinkGameState (guess, gameS) (a, b, c, d, e) = leftGameState
     where lowestRank = (holestR (<) (getR guess))
           highestRank = (holestR (>) (getR guess))
           eliRangeGs = eliByRange ((b, lowestRank), (d, highestRank)) (delete (sort guess) gameS)
-          eliRankSuitGs = eliByRS ((c, getR guess), (e, getS guess)) eliRangeGs
+          eliRankSuitGs = eliByRS ((a, guess), (c, getR guess), (e, getS guess)) eliRangeGs
           leftGameState = eliRankSuitGs
 
--- eliminate the impossible combinations from gamestate, by the 3rd and 5th feedback
--- 1st args : tuple (3rd feedback,  current guess rank)
+-- eliminate the impossible combinations from gamestate, by the 1st, 3rd and 5th feedback
+-- 1st args : tuple (3rd feedback,  current guess rank) (1st feedback,  current guess card)
 -- 2nd current game state
 -- return new game state after elimination
-eliByRS :: ((Int, [Rank]), (Int, [Suit]))-> GameState -> GameState
-eliByRS (rtps, stps) gss =  filter (matchRS (rtps, stps)) gss -- current version
+eliByRS :: ((Int, [Card]), (Int, [Rank]), (Int, [Suit]))-> GameState -> GameState
+eliByRS (ctps, rtps, stps) gss =  filter (matchRS (ctps, rtps, stps)) gss -- current version
 -- eliByRS (rtps, stps) gss = filter (matchSuit stps) (filter (matchRank rtps) gss) -- separate version
 
 -- determine if the card combination match the rank requirement, to filter out
@@ -103,9 +112,16 @@ matchSuit :: (Int, [Suit]) -> [Card] -> Bool
 matchSuit (0, ss) cs = not (lcse ss (getS cs)) -- since there is 0 match in rank, any combination that contain the ranks in current guess is impossible
 matchSuit (n, ss) cs = ccombs ss n (getS cs)
 
+-- determine if the card combination match the suit requirement, to filter out
+-- 1st args : tuple (3rd feedback,  current guess suit)
+-- 2nd args : the card combination in game state (each)
+matchCard :: (Int, [Card]) -> [Card] -> Bool
+matchCard (0, ss) cs = not (lcse ss cs) -- since there is 0 match in rank, any combination that contain the ranks in current guess is impossible
+matchCard (n, ss) cs = ccombs ss n cs
+
 -- combine matchRank and suit in a function
-matchRS :: ((Int, [Rank]), (Int, [Suit])) -> [Card] -> Bool
-matchRS (rtps, stps) cs = (matchRank rtps cs) && (matchSuit stps cs)
+matchRS :: ((Int, [Card]), (Int, [Rank]), (Int, [Suit])) -> [Card] -> Bool
+matchRS (ctps, rtps, stps) cs = (matchRank rtps cs) && (matchSuit stps cs) && (matchCard ctps cs)
 
 -- eliminate the impossible combinations from gamestate, by the 2nd and 4th feedback
 -- 1st args : tuple (2nd feedback, lowestRank), (4th feedback, highestRank)

@@ -47,10 +47,6 @@ combinations n xs = [ y:ys | y:xs' <- tails xs, ys <- combinations (n-1) xs']
 -- second args : the n combinations
 -- third args : check list
 ccombs :: (Ord a)=> [a]-> Int ->[a]->Bool
--- ccombs [] _ [] = True
--- ccombs _ _ [] = False
--- ccombs [] _ _ = False
--- ccombs xs n ys =  or [ (match x ys) == (length x) | x <-(combinations n xs)]
 ccombs xs n ys = (match xs ys) == n
 
 
