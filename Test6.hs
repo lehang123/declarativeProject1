@@ -1,7 +1,7 @@
 module Test6 where
 
 fun :: [Bool] -> Bool
-fun [w,x,y,z] = g
+fun [w,x,y,z] = b
     where u1 = not y || z
           q2 = not y || x
           u2 = not z || y
@@ -14,10 +14,13 @@ fun [w,x,y,z] = g
           f = x || u1
           b = q2 && not (q && z && not w)
           v = (w && y)
-          c = not (v||(x && not u))
+          c = not (v || x) || u
           d = w || not (q && u1)
 
-    -- 34 gates used, fk !!!!
+--           c = not (v||(x && not u))
+--          b = q2 && not (q && z && not w)
+
+    -- 32 gates used
 
 im :: Bool -> Bool -> Bool
 im a b = not a || b
