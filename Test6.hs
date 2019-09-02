@@ -1,26 +1,30 @@
 module Test6 where
 
 fun :: [Bool] -> Bool
-fun [w,x,y,z] = b
-    where u1 = not y || z
-          q2 = not y || x
-          u2 = not z || y
+fun [w,x,y,z] = d
+    where ny = not y
+          nz = not z
+          nq = not q
+          u1 = ny || z
+          q2 = ny || x
+          u2 = nz || y
           q1 = not x || y
           u = (u1 && u2)
           q = (q1 && q2)
-          e = a && not z
-          g = (b || d) && not (x && u || v)
+          e = a && nz
+          g = (b || d) && not (u && x || v)
           a = g || (y && z)
           f = x || u1
-          b = q2 && not (q && z && not w)
+          b = q2 &&  (nq || nz || w)
           v = (w && y)
           c = not (v || x) || u
-          d = w || not (q && u1)
+          d = w || ( nq || not u1)
 
 --           c = not (v||(x && not u))
 --          b = q2 && not (q && z && not w)
+--          d = w || not ( q && u1)
 
-    -- 32 gates used
+    -- 29 gates used
 
 im :: Bool -> Bool -> Bool
 im a b = not a || b
