@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="42b17d49-5baa-425f-a806-217c5c22f064" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MOC_ASS1.docx" beforeDir="false" afterPath="$PROJECT_DIR$/MOC_ASS1.docx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Test6.hs" beforeDir="false" afterPath="$PROJECT_DIR$/Test6.hs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Utils.hs" beforeDir="false" afterPath="$PROJECT_DIR$/Utils.hs" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -26,8 +29,8 @@
       <file leaf-file-name="Test6.hs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Test6.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="468">
-              <caret line="26" column="8" selection-start-line="26" selection-start-column="8" selection-end-line="26" selection-end-column="8" />
+            <state relative-caret-position="90">
+              <caret line="5" column="2" selection-start-line="5" selection-start-column="2" selection-end-line="17" selection-end-column="22" />
             </state>
           </provider>
         </entry>
@@ -35,8 +38,8 @@
       <file leaf-file-name="Utils.hs" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Utils.hs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="864">
-              <caret line="48" column="41" selection-start-line="48" selection-start-column="41" selection-end-line="48" selection-end-column="41" />
+            <state relative-caret-position="362">
+              <caret line="58" column="18" lean-forward="true" selection-start-line="58" selection-start-column="18" selection-end-line="58" selection-end-column="18" />
             </state>
           </provider>
         </entry>
@@ -62,6 +65,7 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>eliByRSeliByRS</find>
+      <find>u2</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -70,8 +74,8 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Utils.hs" />
         <option value="$PROJECT_DIR$/Proj1.hs" />
+        <option value="$PROJECT_DIR$/Utils.hs" />
         <option value="$PROJECT_DIR$/Test6.hs" />
       </list>
     </option>
@@ -268,13 +272,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Utils.hs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="864">
-          <caret line="48" column="41" selection-start-line="48" selection-start-column="41" selection-end-line="48" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Proj1.hs">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="18">
@@ -282,10 +279,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Utils.hs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="362">
+          <caret line="58" column="18" lean-forward="true" selection-start-line="58" selection-start-column="18" selection-end-line="58" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Test6.hs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="468">
-          <caret line="26" column="8" selection-start-line="26" selection-start-column="8" selection-end-line="26" selection-end-column="8" />
+        <state relative-caret-position="90">
+          <caret line="5" column="2" selection-start-line="5" selection-start-column="2" selection-end-line="17" selection-end-column="22" />
         </state>
       </provider>
     </entry>
