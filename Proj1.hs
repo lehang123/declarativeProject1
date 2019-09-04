@@ -58,7 +58,7 @@ nextGuess (guess, gameS) (a, b, c, d, e)
 -- pickRandomGuess :: GameState -> [Card]
 -- pickRandomGuess (cs:gs) = cs
 
--- according to current game state, pick the next best guess
+-- according to current game state, pick the next best guess, by the one get the most feedback
 pickNextGuess :: GameState -> [Card]
 pickNextGuess gs = pickFirstGuess stps
     where stps = sortBy (\(_ , a) (_ , b) -> compare b a) [(cs, (estGuess cs gs))| cs<- gs]
