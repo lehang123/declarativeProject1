@@ -3,24 +3,25 @@ module Test6 where
 
 fun :: [Bool] -> Bool
 fun [w,x,y,z] = c
-    where e = nz && not ((y || x) && (w || ny))
+    where e = nz && not ((yox) && (wony))
           a = e || (z && xoyow)
           f = x || yz
           g = a && nots
           d = xoyow && nots
-          c =  (not wox || yz) && (nxnz || y)
-          b = f && (wox || nz) && nots
-          xoyow =  y || wox
+          c = not ((b && not (wony && (wonz))) || (y && w))  -- not (( w || ny ) && ( w || nz))
+          b = f && (x || wonz) && nots
+          xoyow =  w || yox
           yz = ny || z
-          ny = not y
-          wox = w || x
-          nots = (ny || nxnz)
-          nxnz = not (x && z)
+          yox = y || x
+          nots = not (y && x && z)         -- not (x && z)
           nz = not z
+          ny = not y
+          wony = w || ny
+          wonz = w || nz
 
---  c =  (not wox || yz) && (nxnz || y)
---  b = e && f || (x && ny) || (w && z)
--- e = not ((y || z || x) && (w || yz))
+--  c =  (not wox || yz) && (nxnz || y)      not ((w || x) && (y || z) && not (y && z))
+-- c = not ((nw && b && yoz) || (y && w))
+-- e = not ((y || z || x) && (w || yz))   nz && not ((y || x) && (w || ny))
 
 -- f && not (nwox && yoz) && nots
 

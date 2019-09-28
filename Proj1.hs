@@ -60,21 +60,10 @@ nextGuess (guess, gameS) (a, b, c, d, e)
 
 -- according to current game state, pick the next best guess, by the one get the most feedback
 pickNextGuess :: GameState -> [Card]
-pickNextGuess gs = pickFirstGuess stps
-    where stps = sortBy (\(_ , a) (_ , b) -> compare b a) [(cs, (estGuess cs gs))| cs<- gs]
-
-pickFirstGuess :: [([Card], Int)] -> [Card]
-pickFirstGuess [] = []
-pickFirstGuess ((cs, n):tps) = cs
-
--- estimate a guess computation
--- 1st args : your guess
--- 2rd args : the remaining game state
-estGuess :: [Card] -> GameState -> Int
-estGuess cs gs = (sum [ t (feedback cs acs)  | acs<-gs ])
+pickNextGuess (x:xs) = x
 
 t :: (Int, Int, Int, Int, Int)-> Int
-t (a, b, c, d, e) = a
+t (a, b, c, d, e) = a + b + c + d + e
 
 -- (length (shrinkGameState (cs, gs) (feedback cs acs)))^2
 
