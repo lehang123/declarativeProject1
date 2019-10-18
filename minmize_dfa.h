@@ -12,9 +12,9 @@ import Data.List
 
 -- this can minmize all dfa
 multiples' :: Int -> DFA
-multiples' n = (min_states, "10", min_transitions, 0, [0])
-    where states = [0,1..n-1]
-          transitions = trans states (n)
+multiples' n = (min_states, "aplha", min_transitions, 0, [0])
+    where states = -- your state
+          transitions = -- your transition
           min_prestates = lsort (loop_equivalent [[0], states\\[0]] transitions)
           min_states = [0,1.. ((length min_prestates)-1)]
           min_transitions = min_trans (zip min_states min_prestates) transitions
@@ -22,10 +22,6 @@ multiples' n = (min_states, "10", min_transitions, 0, [0])
 -- a little sort that make it looks nicer
 lsort :: [[Int]] -> [[Int]]
 lsort = sortBy (\(x:xs) (y:ys) -> compare (x) (y))
-
-trans :: [Int] -> Int -> [((Int, Char), Int)]
-trans [] _ = []
-trans (n:ns) s = ((n, '1'), (2*n + 1) `mod` s):((n, '0'), (2*n) `mod` s):(trans ns s)
 
 -- after getting the minimal state, spit out transition
 -- 1st arg : minimal state, 2nd arg : current transition
